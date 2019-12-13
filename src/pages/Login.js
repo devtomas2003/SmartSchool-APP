@@ -10,46 +10,67 @@ export default function Login({ navigation }){
     const [boxText, setboxText] = useState('');
     const [showBox, setshowBox] = useState(false);
     const [colorBox, setcolorBox] = useState(false);
-    async function handleLogin(){
-        await AsyncStorage.removeItem('Authorization');
-        await AsyncStorage.removeItem('ImAuthenticated');
-        await api.post('/login', {
-            email,
-            password
-        }, {
-            headers: { 'device': 'mobile' }
-        }).then(async(response)=>{
-            const { hash } = response.data;
-            await AsyncStorage.setItem("Authorization", hash);
-            await AsyncStorage.setItem("ImAuthenticated", true);
-            navigation.navigate('Menu');
-        }).catch(function (error){
-            if(typeof error === 'object'){
-            if(error.response.data.showIn == "text"){
-                setShowInfo(true);
-                setEmail('');
-                setPass('');
-                this.InEmail.focus();
-                if(error.response.data.level == 3){
-                    setColorInfo(false);
+    async function autoLogon(){
+        if(await AsyncStorage.getItem("Authorization") != null){
+            try{
+                await api.post('/checkLogin', null,
+            { headers: { 'Authorization': 'EST ' + await AsyncStorage.getItem("Authorization") } });
+                navigation.navigate('Menu');
+            }catch (error){
+                if(error.response.data.showIn == "text"){
+                    setShowInfo(true);
+                    if(error.response.data.level == 3){
+                        setColorInfo(false);
+                    }else{
+                        setColorInfo(true);
+                    }
+                    setInfoText(error.response.data.error);
                 }else{
-                    setColorInfo(true);
-                }
-                setInfoText(error.response.data.error);
-            }else{
-                setshowBox(true);
-                setEmail('');
-                setPass('');
-                this.InEmail.focus();
-                if(error.response.data.level == 3){
-                    setcolorBox(false);
-                }else{
-                    setcolorBox(true);
-                }
-                setboxText(error.response.data.error);
+                    setshowBox(true);
+                    if(error.response.data.level == 3){
+                        setcolorBox(false);
+                    }else{
+                        setcolorBox(true);
+                    }
+                    setboxText(error.response.data.error);
+            }
             }
         }
-        });
+    }
+    autoLogon();
+        async function handleLogin(){
+            try {
+                const dados = await api.post('/login', { email, password }, { headers: { 'device': 'mobile' } });
+                const { hash } = dados.data;
+                await AsyncStorage.setItem("Authorization", hash);
+                navigation.navigate('Menu');
+                console.log(dados);
+            } catch (error) {
+                console.log("teste");
+                if(error.response.data.showIn == "text"){
+                    setShowInfo(true);
+                    setEmail('');
+                    setPass('');
+                    InEmail.focus();
+                    if(error.response.data.level == 3){
+                        setColorInfo(false);
+                    }else{
+                        setColorInfo(true);
+                    }
+                    setInfoText(error.response.data.error);
+                }else{
+                    setshowBox(true);
+                    setEmail('');
+                    setPass('');
+                    InEmail.focus();
+                    if(error.response.data.level == 3){
+                        setcolorBox(false);
+                    }else{
+                        setcolorBox(true);
+                    }
+                    setboxText(error.response.data.error);
+            }
+        }
     }
     function hideInfoDuringTyping(text, input){
         if(input == "mail"){
