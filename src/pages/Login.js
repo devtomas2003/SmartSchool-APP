@@ -12,11 +12,11 @@ export default function Login({ navigation }){
     const [colorBox, setcolorBox] = useState(false);
     async function autoLogon(){
         if(await AsyncStorage.getItem("Authorization") != null){
-            try{
-                await api.post('/checkLogin', null,
-            { headers: { 'Authorization': 'EST ' + await AsyncStorage.getItem("Authorization") } });
+            await api.post('/checkLogin', null, {
+                headers: { 'Authorization': 'EST ' + await AsyncStorage.getItem("Authorization") }
+            }).then((res)=>{
                 navigation.navigate('Menu');
-            }catch (error){
+            }).catch(function (error){
                 if(error.response.data.showIn == "text"){
                     setShowInfo(true);
                     if(error.response.data.level == 3){
@@ -34,43 +34,48 @@ export default function Login({ navigation }){
                     }
                     setboxText(error.response.data.error);
             }
-            }
+            });
         }
     }
     autoLogon();
-        async function handleLogin(){
-            try {
-                const dados = await api.post('/login', { email, password }, { headers: { 'device': 'mobile' } });
-                const { hash } = dados.data;
-                await AsyncStorage.setItem("Authorization", hash);
-                navigation.navigate('Menu');
-                console.log(dados);
-            } catch (error) {
-                console.log("teste");
-                if(error.response.data.showIn == "text"){
-                    setShowInfo(true);
-                    setEmail('');
-                    setPass('');
-                    InEmail.focus();
-                    if(error.response.data.level == 3){
-                        setColorInfo(false);
-                    }else{
-                        setColorInfo(true);
-                    }
-                    setInfoText(error.response.data.error);
+    async function saveStorage(name, value){
+        await AsyncStorage.setItem(name, value);
+    }
+    async function handleLogin(){
+        await api.post('/login', {
+            email,
+            password
+        }, {
+            headers: { 'device': 'mobile' }
+        }).then((response)=>{
+            const { hash } = response.data;
+            saveStorage("Authorization", hash);
+            navigation.navigate('Menu');
+        }).catch(function (error){
+            if(error.response.data.showIn == "text"){
+                setShowInfo(true);
+                setEmail('');
+                setPass('');
+                this.InEmail.focus();
+                if(error.response.data.level == 3){
+                    setColorInfo(false);
                 }else{
-                    setshowBox(true);
-                    setEmail('');
-                    setPass('');
-                    InEmail.focus();
-                    if(error.response.data.level == 3){
-                        setcolorBox(false);
-                    }else{
-                        setcolorBox(true);
-                    }
-                    setboxText(error.response.data.error);
-            }
+                    setColorInfo(true);
+                }
+                setInfoText(error.response.data.error);
+            }else{
+                setshowBox(true);
+                setEmail('');
+                setPass('');
+                this.InEmail.focus();
+                if(error.response.data.level == 3){
+                    setcolorBox(false);
+                }else{
+                    setcolorBox(true);
+                }
+                setboxText(error.response.data.error);
         }
+        });
     }
     function hideInfoDuringTyping(text, input){
         if(input == "mail"){
