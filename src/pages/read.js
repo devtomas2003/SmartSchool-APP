@@ -1,21 +1,11 @@
 import * as React from 'react';
-import {
-  Text,
-  View,
-  StyleSheet,
-  Button
-} from 'react-native';
+import { Text, View, StyleSheet, Button } from 'react-native';
 import * as Permissions from 'expo-permissions';
 
-import {
-  BarCodeScanner
-} from 'expo-barcode-scanner';
+import { BarCodeScanner } from 'expo-barcode-scanner';
 
 export default class BarcodeScannerExample extends React.Component {
-  state = {
-    hasCameraPermission: null,
-    scanned: false,
-  };
+  state = { hasCameraPermission: null };
 
   async componentDidMount() {
     this.getPermissionsAsync();
@@ -31,37 +21,22 @@ export default class BarcodeScannerExample extends React.Component {
   };
 
   render() {
-    const {
-      hasCameraPermission,
-      scanned
-    } = this.state;
+    const { hasCameraPermission } = this.state;
 
     if (hasCameraPermission === null) {
-      return <Text> Requesting for camera permission </Text>;
+      return <Text> Aceite o accesso a camera </Text>;
     }
-    if (hasCameraPermission === false) {
-      return <Text> No access to camera </Text>;
-    }
-    return (<View style = {
-        {
-          flex: 1,
-          flexDirection: 'column',
-          justifyContent: 'flex-end',
-        }
-      } >
-      <
-      BarCodeScanner onBarCodeScanned = {
-        scanned ? undefined : this.handleBarCodeScanned
-      }
-      style = {
-        StyleSheet.absoluteFillObject
-      }
-      />
 
-      {scanned && ( <Button title = {'Tap to Scan Again'}
-      onPress = {() => this.setState({scanned: false})}
-    />
-        )} </View>
+    if (hasCameraPermission === false) {
+      return <Text> Como bloqueou o accesso a camera não é possivel usar esta função </Text>;
+    }
+
+    return ( <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-end',}}>
+      <
+      BarCodeScanner onBarCodeScanned = { this.handleBarCodeScanned }
+      style = {StyleSheet.absoluteFillObject}
+      />
+        </View>
     );
   }
 
@@ -72,6 +47,6 @@ export default class BarcodeScannerExample extends React.Component {
     this.setState({
       scanned: true
     });
-    alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+    this.props.navigation.navigate('Resultado', { sala: data });
   };
 }

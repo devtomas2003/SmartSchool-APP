@@ -2,7 +2,11 @@ import React from 'react';
 import { SafeAreaView, StyleSheet, Text, TouchableHighlight } from 'react-native';
 
 export default function Menu(){
-    return <SafeAreaView style={styles.container}><TouchableHighlight style={styles.btnCnt}><Text style={styles.btnText}>Ler QRCODE</Text></TouchableHighlight></SafeAreaView>
+    return <SafeAreaView style={styles.container}>
+        <TouchableHighlight style={styles.btnCnt}>
+            <Text style={styles.btnText}>Ler QRCODE</Text>
+            </TouchableHighlight>
+            </SafeAreaView>
 }
 
 const styles = StyleSheet.create({
