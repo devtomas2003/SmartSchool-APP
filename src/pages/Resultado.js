@@ -1,28 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-import { SafeAreaView, StyleSheet, Text } from 'react-native';
-
+import { Text, SafeAreaView, StyleSheet, AsyncStorage } from 'react-native';
 export default function Resultado({ navigation }){
-    const [sala, setSala] = useState('');
     const [disciplina, setDisciplina] = useState('');
     const [prof, setProf] = useState('');
+    const [sala, setSala] = useState('');
     const [turma, setTurma] = useState('');
-    async function getTimes(){
-        await api.post('/qrcode', { hashSala: navigation.getParams('sala','nothing sent'), time: new Date() }, {
-            headers: { 'Authorization': 'EST ' + await AsyncStorage.getItem("Authorization") }
-        }).then((res)=>{
-            console.log(res.data);
-        }).catch(function (error){
-
-        });
-    }
-    getTimes();
-    return <SafeAreaView style={styles.container}>
-        <Text value={sala}></Text>
-        <Text value={disciplina}></Text>
-        <Text value={prof}></Text>
-        <Text value={turma}></Text>
+    useEffect(() => {
+        async function getTimes() {
+            await api.post('/qrcode', { hashSala: navigation.getParam('sala'), time: new Date() }, {
+                headers: { 'Authorization': 'EST ' + await AsyncStorage.getItem("Authorization") }
+            }).then((res)=>{
+                setDisciplina(res.data.disciplina);
+                setProf(res.data.professor);
+                setSala(res.data.sala);
+                setTurma(res.data.turma);
+            }).catch(function (error){
+                console.log(error);
+            });
+        }
+        getTimes();
+    }, []);
+    return(
+<SafeAreaView style={styles.container}>
+        <Text>{disciplina}</Text>
+        <Text>{prof}</Text>
+        <Text>{sala}</Text>
+        <Text>{turma}</Text>
     </SafeAreaView>
+    );
 }
 
 const styles = StyleSheet.create({

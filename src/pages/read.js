@@ -1,10 +1,10 @@
 import * as React from 'react';
-import { Text, View, StyleSheet, Button } from 'react-native';
+import { Text, View, StyleSheet } from 'react-native';
 import * as Permissions from 'expo-permissions';
 
 import { BarCodeScanner } from 'expo-barcode-scanner';
 
-export default class BarcodeScannerExample extends React.Component {
+export default class qrcodeReader extends React.Component {
   state = { hasCameraPermission: null };
 
   async componentDidMount() {
@@ -44,9 +44,6 @@ export default class BarcodeScannerExample extends React.Component {
     type,
     data
   }) => {
-    this.setState({
-      scanned: true
-    });
     this.props.navigation.navigate('Resultado', { sala: data });
   };
 }

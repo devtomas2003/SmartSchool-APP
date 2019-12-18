@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, AsyncStorage, KeyboardAvoidingView, StyleSheet, TextInput, TouchableHighlight, Text } from 'react-native';
+import NetInfo from "@react-native-community/netinfo";
 import api from '../services/api';
 export default function Login({ navigation }){
     const [email, setEmail] = useState('');
@@ -10,34 +11,45 @@ export default function Login({ navigation }){
     const [boxText, setboxText] = useState('');
     const [showBox, setshowBox] = useState(false);
     const [colorBox, setcolorBox] = useState(false);
-    async function autoLogon(){
-        if(await AsyncStorage.getItem("Authorization") != null){
-            await api.post('/checkLogin', null, {
-                headers: { 'Authorization': 'EST ' + await AsyncStorage.getItem("Authorization") }
-            }).then((res)=>{
-                navigation.navigate('Menu');
-            }).catch(function (error){
-                if(error.response.data.showIn == "text"){
-                    setShowInfo(true);
-                    if(error.response.data.level == 3){
-                        setColorInfo(false);
+
+    useEffect(() => {
+        async function autoLogon() {
+            if(await AsyncStorage.getItem("Authorization") != null){
+                await api.post('/checkToken', null, {
+                    headers: { 'Authorization': 'EST ' + await AsyncStorage.getItem("Authorization") }
+                }).then((res)=>{
+                    navigation.navigate('Menu');
+                }).catch(function (error){
+                    if(error.response.data.showIn == "text"){
+                        setShowInfo(true);
+                        if(error.response.data.level == 3){
+                            setColorInfo(false);
+                        }else{
+                            setColorInfo(true);
+                        }
+                        setInfoText(error.response.data.error);
                     }else{
-                        setColorInfo(true);
-                    }
-                    setInfoText(error.response.data.error);
-                }else{
-                    setshowBox(true);
-                    if(error.response.data.level == 3){
-                        setcolorBox(false);
-                    }else{
-                        setcolorBox(true);
-                    }
-                    setboxText(error.response.data.error);
+                        setshowBox(true);
+                        if(error.response.data.level == 3){
+                            setcolorBox(false);
+                        }else{
+                            setcolorBox(true);
+                        }
+                        setboxText(error.response.data.error);
+                }
+                });
             }
-            });
         }
-    }
-    autoLogon();
+        autoLogon();
+    }, []);
+
+    useState(() => {
+        NetInfo.fetch().then(state => {
+            console.log("Connection type", state.type);
+            console.log("Is connected?", state.isConnected);
+          });
+    }, [])
+
     async function saveStorage(name, value){
         await AsyncStorage.setItem(name, value);
     }
