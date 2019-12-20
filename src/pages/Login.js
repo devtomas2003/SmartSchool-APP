@@ -13,12 +13,37 @@ export default function Login({ navigation }){
     const [colorBox, setcolorBox] = useState(false);
 
     useEffect(() => {
+        NetInfo.fetch().then(state => {
+            if(state.isConnected == false){
+                navigation.navigate('NoConnection');
+            }else{
+                verifyVersion();
+            }
+        });
+
+        async function verifyVersion() {
+            if(!navigation.getParam('userState')){
+                const lastVersion = 'v1.0';
+                await api.post('/version', {
+                    version: lastVersion
+                }).then((response)=>{
+                    if(response.data.status == "needUpdate"){
+                        navigation.navigate('Update', { forceDownload: response.data.forceDownload, newVersion: response.data.newVersion });
+                    }else{
+                        autoLogon();
+                    }
+                });
+            }else{
+                autoLogon();
+            }
+        }
+
         async function autoLogon() {
             if(await AsyncStorage.getItem("Authorization") != null){
                 await api.post('/checkToken', null, {
                     headers: { 'Authorization': 'EST ' + await AsyncStorage.getItem("Authorization") }
                 }).then((res)=>{
-                    navigation.navigate('Menu');
+                    navigation.navigate('Menu', { name: res.data.name });
                 }).catch(function (error){
                     if(error.response.data.showIn == "text"){
                         setShowInfo(true);
@@ -40,19 +65,12 @@ export default function Login({ navigation }){
                 });
             }
         }
-        autoLogon();
     }, []);
-
-    useState(() => {
-        NetInfo.fetch().then(state => {
-            console.log("Connection type", state.type);
-            console.log("Is connected?", state.isConnected);
-          });
-    }, [])
 
     async function saveStorage(name, value){
         await AsyncStorage.setItem(name, value);
     }
+
     async function handleLogin(){
         await api.post('/login', {
             email,
@@ -60,9 +78,9 @@ export default function Login({ navigation }){
         }, {
             headers: { 'device': 'mobile' }
         }).then((response)=>{
-            const { hash } = response.data;
+            const { hash, name } = response.data;
             saveStorage("Authorization", hash);
-            navigation.navigate('Menu');
+            navigation.navigate('Menu', {name});
         }).catch(function (error){
             if(error.response.data.showIn == "text"){
                 setShowInfo(true);
@@ -89,6 +107,7 @@ export default function Login({ navigation }){
         }
         });
     }
+
     function hideInfoDuringTyping(text, input){
         if(input == "mail"){
             setEmail(text);
@@ -98,6 +117,7 @@ export default function Login({ navigation }){
         setShowInfo(false);
         setshowBox(false);
     }
+    
     return (
         <KeyboardAvoidingView behavior="padding" style={styles.container}>
             <Text style={styles.logo}>Smart School</Text>
