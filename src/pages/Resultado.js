@@ -8,15 +8,16 @@ export default function Resultado({ navigation }){
     const [turma, setTurma] = useState('');
     useEffect(() => {
         async function getTimes() {
-            await api.post('/qrcode', { hashSala: navigation.getParam('sala'), time: new Date() }, {
+            await api.post('/qrcode', { hashSala: navigation.getParam('sala'), time: '2019-12-19T14:51:23.354Z' }, {
                 headers: { 'Authorization': 'EST ' + await AsyncStorage.getItem("Authorization") }
             }).then((res)=>{
+                console.log(res);
                 setDisciplina(res.data.disciplina);
                 setProf(res.data.professor);
                 setSala(res.data.sala);
                 setTurma(res.data.turma);
             }).catch(function (error){
-                console.log(error);
+                console.log(error.response.data);
             });
         }
         getTimes();

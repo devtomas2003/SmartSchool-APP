@@ -1,111 +1,90 @@
 import React, { useState, useEffect } from 'react';
-import { View, AsyncStorage, KeyboardAvoidingView, StyleSheet, TextInput, TouchableHighlight, Text } from 'react-native';
-import NetInfo from "@react-native-community/netinfo";
+import { View, KeyboardAvoidingView, StyleSheet, TextInput, TouchableHighlight, Text, Picker } from 'react-native';
 import api from '../services/api';
-export default function Login({ navigation }){
+export default function Register({ navigation }){
+    const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPass] = useState('');
+    const [turmas, setTurmas] = useState([]);
+    const [turma, setTurma] = useState('');
     const [infoText, setInfoText] = useState('');
     const [showInfo, setShowInfo] = useState(false);
-    const [colorInfo, setColorInfo] = useState(false);
+    const [colorInfo, setColorInfo] = useState('');
     const [boxText, setboxText] = useState('');
     const [showBox, setshowBox] = useState(false);
-    const [colorBox, setcolorBox] = useState(false);
+    const [colorBox, setcolorBox] = useState('');
 
     useEffect(() => {
-        NetInfo.fetch().then(state => {
-            if(state.isConnected == false){
-                navigation.navigate('NoConnection');
-            }else{
-                verifyVersion();
-            }
-        });
-
-        async function verifyVersion() {
-            if(!navigation.getParam('userState')){
-                const lastVersion = 'v1.0';
-                await api.post('/version', {
-                    version: lastVersion
-                }).then((response)=>{
-                    if(response.data.status == "needUpdate"){
-                        navigation.navigate('Update', { forceDownload: response.data.forceDownload, newVersion: response.data.newVersion });
-                    }else{
-                        autoLogon();
-                    }
-                });
-            }else{
-                autoLogon();
-            }
+        async function getTurmas(){
+            await api.post('/getTurmas').then((response)=>{
+                setTurmas(response.data.turmas);
+            });
         }
-
-        async function autoLogon() {
-            if(await AsyncStorage.getItem("Authorization") != null){
-                await api.post('/checkToken', null, {
-                    headers: { 'Authorization': 'EST ' + await AsyncStorage.getItem("Authorization") }
-                }).then((res)=>{
-                    navigation.navigate('Menu', { name: res.data.name });
-                }).catch(function (error){
-                    if(error.response.data.showIn == "text"){
-                        setShowInfo(true);
-                        if(error.response.data.level == 3){
-                            setColorInfo(false);
-                        }else{
-                            setColorInfo(true);
-                        }
-                        setInfoText(error.response.data.error);
-                    }else{
-                        setshowBox(true);
-                        if(error.response.data.level == 3){
-                            setcolorBox(false);
-                        }else{
-                            setcolorBox(true);
-                        }
-                        setboxText(error.response.data.error);
-                }
-                });
-            }
-        }
+        getTurmas();
     }, []);
 
-    function makeAccount(){
-        navigation.navigate('Register');
-    }
-
-    async function saveStorage(name, value){
-        await AsyncStorage.setItem(name, value);
-    }
-
-    async function handleLogin(){
-        await api.post('/login', {
-            email,
+    async function handleRegister(){
+        await api.post('/newAccount', {
+            name,
+            mail: email,
             password
-        }, {
-            headers: { 'device': 'mobile' }
         }).then((response)=>{
-            const { hash, name } = response.data;
-            saveStorage("Authorization", hash);
-            navigation.navigate('Menu', {name});
+            if(response.data.showIn == "text"){
+                setShowInfo(true);
+                setEmail('');
+                setPass('');
+                setName('');
+                setTurma('');
+                if(response.data.level == 3){
+                    setColorInfo('error');
+                }else if(response.data.level == 2){
+                    setColorInfo('warm');
+                }else{
+                    setColorInfo('ok');
+                }
+                setInfoText(response.data.error);
+            }else{
+                setshowBox(true);
+                setEmail('');
+                setPass('');
+                setName('');
+                if(response.data.level == 3){
+                    setcolorBox('error');
+                }else if(response.data.level == 2){
+                    setcolorBox('warm');
+                }else{
+                    setcolorBox('ok');
+                }
+                setboxText(response.data.error);
+        }
         }).catch(function (error){
             if(error.response.data.showIn == "text"){
                 setShowInfo(true);
                 setEmail('');
                 setPass('');
-                this.InEmail.focus();
+                setName('');
+                setTurma('');
+                this.nome.focus();
                 if(error.response.data.level == 3){
-                    setColorInfo(false);
+                    setColorInfo('error');
+                }else if(error.response.data.level == 2){
+                    setColorInfo('warm');
                 }else{
-                    setColorInfo(true);
+                    setColorInfo('ok');
                 }
                 setInfoText(error.response.data.error);
             }else{
                 setshowBox(true);
                 setEmail('');
                 setPass('');
-                this.InEmail.focus();
+                setName('');
+                this.nome.focus();
                 if(error.response.data.level == 3){
-                    setcolorBox(false);
+                    setcolorBox('error');
+                }else if(error.response.data.level == 2){
+                    setcolorBox('warm');
                 }else{
-                    setcolorBox(true);
+                    setcolorBox('ok');
                 }
                 setboxText(error.response.data.error);
         }
@@ -115,19 +94,38 @@ export default function Login({ navigation }){
     function hideInfoDuringTyping(text, input){
         if(input == "mail"){
             setEmail(text);
+        }else if(input == "nome"){
+            setName(text);
+        }else if(input == "turma"){
+            setTurma(text);
         }else{
             setPass(text);
         }
         setShowInfo(false);
         setshowBox(false);
     }
-    
+
+    function startSession(){
+        navigation.navigate('Login');        
+    }
+
     return (
         <KeyboardAvoidingView behavior="padding" style={styles.container}>
             <Text style={styles.logo}>Smart School</Text>
             <View style={styles.form}>
-            { showDev ? colorDev == "warm" ? <View style={styles.boxWarm}><Text style={styles.boxWarmText}>{devText}</Text></View> : colorDev == "error" ? <View style={styles.boxError}><Text style={styles.boxWarmText}>{devText}</Text></View> : <View style={styles.boxOk}><Text style={styles.boxWarmText}>{devText}</Text></View> : null }
-            { showBox ? colorBox ? <View style={styles.boxWarm}><Text style={styles.boxWarmText}>{boxText}</Text></View> : <View style={styles.boxError}><Text style={styles.boxWarmText}>{boxText}</Text></View> : null }
+            { showBox ? colorBox == "warm" ? <View style={styles.boxWarm}><Text style={styles.boxWarmText}>{boxText}</Text></View> : colorBox == "error" ? <View style={styles.boxError}><Text style={styles.boxWarmText}>{boxText}</Text></View> : <View style={styles.boxOk}><Text style={styles.boxWarmText}>{boxText}</Text></View> : null }
+                <Text style={styles.label}>Nome:</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Introduza o seu nome"
+                    placeholderTexor="#999"
+                    keyboardType="default"
+                    autoCorrect={false}
+                    value={name}
+                    ref={(input) => this.nome = input}
+                    onChangeText={nome => hideInfoDuringTyping(nome, "nome")}
+                    onSubmitEditing={() => this.InEmail.focus()}
+                />
                 <Text style={styles.label}>E-MAIL:</Text>
                 <TextInput
                     style={styles.input}
@@ -151,12 +149,19 @@ export default function Login({ navigation }){
                     value={password}
                     ref={(input) => this.passwords = input}
                     onChangeText={pass => hideInfoDuringTyping(pass, "pass") }
-                    onSubmitEditing={handleLogin}
                 />
-                { showInfo ? <Text style={colorInfo ? styles.infoWarm : styles.infoError}>{infoText}</Text> : null }
-                <TouchableHighlight onPress={handleLogin} style={styles.buttonMain}><Text style={styles.buttonTextMain}>Iniciar Sessão</Text></TouchableHighlight>
-                <TouchableHighlight onPress={makeAccount} style={styles.buttonSecundary}><Text style={styles.buttonTextSecundary}>Criar uma conta!</Text></TouchableHighlight>
-                <TouchableHighlight style={styles.buttonSecundary}><Text style={styles.buttonTextSecundary}>Esqueci a minha password!</Text></TouchableHighlight>
+                <Text style={styles.label}>Selecione a sua Turma</Text>
+                <Picker
+                style={styles.input}
+                selectedValue={turma}
+                onValueChange={(itemValue, itemIndex) => hideInfoDuringTyping(itemValue, "turma") } >
+                    { turmas.map(turma => (
+                        <Picker.Item key={turma} label={turma} value={turma} />
+                    ))}
+                </Picker>
+                { showInfo ? <Text style={colorInfo == "warm" ? styles.infoWarm : colorInfo == "error" ? styles.infoError : styles.infoOk }>{infoText}</Text> : null }
+                <TouchableHighlight onPress={handleRegister} style={styles.buttonMain}><Text style={styles.buttonTextMain}>Criar a conta</Text></TouchableHighlight>
+                <TouchableHighlight onPress={startSession} style={styles.buttonSecundary}><Text style={styles.buttonTextSecundary}>Iniciar Sessão</Text></TouchableHighlight>
             </View>
         </KeyboardAvoidingView>
     );
@@ -209,14 +214,6 @@ const styles = StyleSheet.create({
         color: '#FFF',
         fontSize: 16
     },
-    boxOk: {
-        alignSelf: 'stretch',
-        alignItems: 'center',
-        backgroundColor: '#4caf50',
-        paddingVertical: 10,
-        borderRadius: 2,
-        marginBottom: 20
-    },
     buttonTextSecundary: {
         color: '#444',
         fontSize: 16
@@ -231,6 +228,11 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         color: '#ffb818'
     },
+    infoOk: {
+        textAlign: 'center',
+        marginBottom: 20,
+        color: '#4caf50'
+    },
     infoError: {
         textAlign: 'center',
         marginBottom: 20,
@@ -240,6 +242,14 @@ const styles = StyleSheet.create({
         alignSelf: 'stretch',
         alignItems: 'center',
         backgroundColor: '#f05a5b',
+        paddingVertical: 10,
+        borderRadius: 2,
+        marginBottom: 20
+    },
+    boxOk: {
+        alignSelf: 'stretch',
+        alignItems: 'center',
+        backgroundColor: '#4caf50',
         paddingVertical: 10,
         borderRadius: 2,
         marginBottom: 20

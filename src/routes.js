@@ -4,12 +4,14 @@ import React from 'react';
 import Login from './pages/Login';
 import read from './pages/read';
 import Menu from './pages/Menu';
+import Register from './pages/Register';
 import Resultado from './pages/Resultado';
 import NoConnection from './pages/NoConnection';
 import Update from './pages/Update';
 const Routes = createAppContainer(
     createSwitchNavigator({
         Login,
+        Register,
         Menu,
         read,
         Resultado,
