@@ -70,8 +70,18 @@ export default function Login({ navigation }){
                         }
                         setboxText(error.response.data.error);
                 }
+                devNotifications();
                 });
             }
+        }
+        async function devNotifications() {
+                await api.post('/devNotification', null).then((response)=>{
+                    if(response.data.status == "needShow"){
+                        setshowDev(true);
+                        setcolorDev(response.data.colorDev);
+                        setdevText(response.data.txtDev);
+                    }
+                });
         }
     }, []);
 
