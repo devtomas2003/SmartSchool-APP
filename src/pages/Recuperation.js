@@ -1,12 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, KeyboardAvoidingView, StyleSheet, TextInput, TouchableHighlight, Text, Picker } from 'react-native';
 import api from '../services/api';
-export default function Register({ navigation }){
-    const [name, setName] = useState('');
+export default function Recuperation({ navigation }){
     const [email, setEmail] = useState('');
-    const [password, setPass] = useState('');
-    const [turmas, setTurmas] = useState([]);
-    const [turma, setTurma] = useState('');
     const [infoText, setInfoText] = useState('');
     const [showInfo, setShowInfo] = useState(false);
     const [colorInfo, setColorInfo] = useState('');
@@ -14,28 +10,13 @@ export default function Register({ navigation }){
     const [showBox, setshowBox] = useState(false);
     const [colorBox, setcolorBox] = useState('');
 
-    useEffect(() => {
-        async function getTurmas(){
-            await api.post('/getTurmas').then((response)=>{
-                setTurmas(response.data.turmas);
-            });
-        }
-        getTurmas();
-    }, []);
-
-    async function handleRegister(){
-        await api.post('/newAccount', {
-            name,
-            mail: email,
-            password,
-            turma
+    async function handleRecover(){
+        await api.post('/recover', {
+            mail: email
         }).then((response)=>{
             if(response.data.showIn == "text"){
                 setShowInfo(true);
                 setEmail('');
-                setPass('');
-                setName('');
-                setTurma('');
                 if(response.data.level == 3){
                     setColorInfo('error');
                 }else if(response.data.level == 2){
@@ -47,9 +28,6 @@ export default function Register({ navigation }){
             }else{
                 setshowBox(true);
                 setEmail('');
-                setPass('');
-                setName('');
-                setTurma('');
                 if(response.data.level == 3){
                     setcolorBox('error');
                 }else if(response.data.level == 2){
@@ -63,10 +41,7 @@ export default function Register({ navigation }){
             if(error.response.data.showIn == "text"){
                 setShowInfo(true);
                 setEmail('');
-                setPass('');
-                setName('');
-                setTurma('');
-                this.nome.focus();
+                this.InEmail.focus();
                 if(error.response.data.level == 3){
                     setColorInfo('error');
                 }else if(error.response.data.level == 2){
@@ -78,10 +53,7 @@ export default function Register({ navigation }){
             }else{
                 setshowBox(true);
                 setEmail('');
-                setPass('');
-                setName('');
-                setTurma('');
-                this.nome.focus();
+                this.InEmail.focus();
                 if(error.response.data.level == 3){
                     setcolorBox('error');
                 }else if(error.response.data.level == 2){
@@ -97,12 +69,6 @@ export default function Register({ navigation }){
     function hideInfoDuringTyping(text, input){
         if(input == "mail"){
             setEmail(text);
-        }else if(input == "nome"){
-            setName(text);
-        }else if(input == "turma"){
-            setTurma(text);
-        }else{
-            setPass(text);
         }
         setShowInfo(false);
         setshowBox(false);
@@ -117,19 +83,7 @@ export default function Register({ navigation }){
             <Text style={styles.logo}>Smart School</Text>
             <View style={styles.form}>
             { showBox ? colorBox == "warm" ? <View style={styles.boxWarm}><Text style={styles.boxWarmText}>{boxText}</Text></View> : colorBox == "error" ? <View style={styles.boxError}><Text style={styles.boxWarmText}>{boxText}</Text></View> : <View style={styles.boxOk}><Text style={styles.boxWarmText}>{boxText}</Text></View> : null }
-                <Text style={styles.label}>Nome:</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Introduza o seu nome"
-                    placeholderTexor="#999"
-                    keyboardType="default"
-                    autoCorrect={false}
-                    value={name}
-                    ref={(input) => this.nome = input}
-                    onChangeText={nome => hideInfoDuringTyping(nome, "nome")}
-                    onSubmitEditing={() => this.InEmail.focus()}
-                />
-                <Text style={styles.label}>E-MAIL:</Text>
+                <Text style={styles.label}>INSIRA O SEU E-MAIL:</Text>
                 <TextInput
                     style={styles.input}
                     placeholder="Introduza o seu e-mail"
@@ -140,31 +94,11 @@ export default function Register({ navigation }){
                     value={email}
                     ref={(input) => this.InEmail = input}
                     onChangeText={mail => hideInfoDuringTyping(mail, "mail")}
-                    onSubmitEditing={() => this.passwords.focus()}
+                    onSubmitEditing={handleRecover}
                 />
-                <Text style={styles.label}>PASSWORD:</Text>
-                <TextInput
-                    style={styles.input}
-                    textContentType="password"
-                    placeholder="Introduza a sua password"
-                    secureTextEntry={true}
-                    placeholderTextColor="#999"
-                    value={password}
-                    ref={(input) => this.passwords = input}
-                    onChangeText={pass => hideInfoDuringTyping(pass, "pass") }
-                />
-                <Text style={styles.label}>Selecione a sua Turma</Text>
-                <Picker
-                style={styles.input}
-                selectedValue={turma}
-                onValueChange={(itemValue, itemIndex) => hideInfoDuringTyping(itemValue, "turma") } >
-                    { turmas.map(turma => (
-                        <Picker.Item key={turma} label={turma} value={turma} />
-                    ))}
-                </Picker>
                 { showInfo ? <Text style={colorInfo == "warm" ? styles.infoWarm : colorInfo == "error" ? styles.infoError : styles.infoOk }>{infoText}</Text> : null }
-                <TouchableHighlight onPress={handleRegister} style={styles.buttonMain}><Text style={styles.buttonTextMain}>Criar a conta</Text></TouchableHighlight>
-                <TouchableHighlight onPress={startSession} style={styles.buttonSecundary}><Text style={styles.buttonTextSecundary}>Iniciar Sessão</Text></TouchableHighlight>
+                <TouchableHighlight onPress={handleRecover} style={styles.buttonMain}><Text style={styles.buttonTextMain}>Recuperar Password</Text></TouchableHighlight>
+                <TouchableHighlight onPress={startSession} style={styles.buttonSecundary}><Text style={styles.buttonTextSecundary}>Lembrei-me!</Text></TouchableHighlight>
             </View>
         </KeyboardAvoidingView>
     );

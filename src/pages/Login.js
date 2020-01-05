@@ -11,6 +11,10 @@ export default function Login({ navigation }){
     const [boxText, setboxText] = useState('');
     const [showBox, setshowBox] = useState(false);
     const [colorBox, setcolorBox] = useState(false);
+    const [showDev, setshowDev] = useState(false);
+    const [colorDev, setcolorDev] = useState('');
+    const [devText, setdevText] = useState('');
+
 
     useEffect(() => {
         NetInfo.fetch().then(state => {
@@ -43,7 +47,11 @@ export default function Login({ navigation }){
                 await api.post('/checkToken', null, {
                     headers: { 'Authorization': 'EST ' + await AsyncStorage.getItem("Authorization") }
                 }).then((res)=>{
-                    navigation.navigate('Menu', { name: res.data.name });
+                    if(res.data.recuperated == 0){
+                        navigation.navigate('Menu', { name: res.data.name });
+                    }else{
+                        navigation.navigate('ResetPassword');
+                    }
                 }).catch(function (error){
                     if(error.response.data.showIn == "text"){
                         setShowInfo(true);
@@ -71,6 +79,10 @@ export default function Login({ navigation }){
         navigation.navigate('Register');
     }
 
+    function recoverPass(){
+        navigation.navigate('Recuperation');
+    }
+
     async function saveStorage(name, value){
         await AsyncStorage.setItem(name, value);
     }
@@ -82,9 +94,13 @@ export default function Login({ navigation }){
         }, {
             headers: { 'device': 'mobile' }
         }).then((response)=>{
-            const { hash, name } = response.data;
+            const { hash, name, recuperated } = response.data;
             saveStorage("Authorization", hash);
-            navigation.navigate('Menu', {name});
+            if(recuperated == 0){
+                navigation.navigate('Menu', { name });
+            }else{
+                navigation.navigate('ResetPassword');
+            }
         }).catch(function (error){
             if(error.response.data.showIn == "text"){
                 setShowInfo(true);
@@ -156,7 +172,7 @@ export default function Login({ navigation }){
                 { showInfo ? <Text style={colorInfo ? styles.infoWarm : styles.infoError}>{infoText}</Text> : null }
                 <TouchableHighlight onPress={handleLogin} style={styles.buttonMain}><Text style={styles.buttonTextMain}>Iniciar Sessão</Text></TouchableHighlight>
                 <TouchableHighlight onPress={makeAccount} style={styles.buttonSecundary}><Text style={styles.buttonTextSecundary}>Criar uma conta!</Text></TouchableHighlight>
-                <TouchableHighlight style={styles.buttonSecundary}><Text style={styles.buttonTextSecundary}>Esqueci a minha password!</Text></TouchableHighlight>
+                <TouchableHighlight onPress={recoverPass} style={styles.buttonSecundary}><Text style={styles.buttonTextSecundary}>Esqueci a minha password!</Text></TouchableHighlight>
             </View>
         </KeyboardAvoidingView>
     );

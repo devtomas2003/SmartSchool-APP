@@ -7,11 +7,15 @@ import Menu from './pages/Menu';
 import Register from './pages/Register';
 import Resultado from './pages/Resultado';
 import NoConnection from './pages/NoConnection';
+import Recuperation from './pages/Recuperation';
+import ResetPassword from './pages/ResetPassword';
 import Update from './pages/Update';
 const Routes = createAppContainer(
     createSwitchNavigator({
         Login,
         Register,
+        Recuperation,
+        ResetPassword,
         Menu,
         read,
         Resultado,

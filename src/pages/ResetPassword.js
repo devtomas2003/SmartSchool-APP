@@ -1,72 +1,61 @@
-import React, { useState, useEffect } from 'react';
-import { View, KeyboardAvoidingView, StyleSheet, TextInput, TouchableHighlight, Text, Picker } from 'react-native';
+import React, { useState } from 'react';
+import { View, KeyboardAvoidingView, StyleSheet, TextInput, TouchableHighlight, Text, AsyncStorage } from 'react-native';
 import api from '../services/api';
-export default function Register({ navigation }){
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPass] = useState('');
-    const [turmas, setTurmas] = useState([]);
-    const [turma, setTurma] = useState('');
+export default function Recuperation({ navigation }){
+    const [newPass, setnewPass] = useState('');
+    const [renewpass, setrenewpass] = useState('');
     const [infoText, setInfoText] = useState('');
     const [showInfo, setShowInfo] = useState(false);
     const [colorInfo, setColorInfo] = useState('');
     const [boxText, setboxText] = useState('');
     const [showBox, setshowBox] = useState(false);
     const [colorBox, setcolorBox] = useState('');
+    const [showContent, setshowContent] = useState(true);
+    const [btnTxt, setbtnTxt] = useState('Voltar');
 
-    useEffect(() => {
-        async function getTurmas(){
-            await api.post('/getTurmas').then((response)=>{
-                setTurmas(response.data.turmas);
-            });
+    async function handleRecover(){
+        if(newPass != renewpass){
+            setShowInfo(true);
+            setColorInfo('warm');
+            setInfoText('As passwords não correspondem!');
+            setnewPass('');
+            setrenewpass('');
         }
-        getTurmas();
-    }, []);
-
-    async function handleRegister(){
-        await api.post('/newAccount', {
-            name,
-            mail: email,
-            password,
-            turma
-        }).then((response)=>{
+        await api.post('/changePass', {
+            password: newPass
+        }, { headers: { 'Authorization': 'EST ' + await AsyncStorage.getItem("Authorization") }}).then((response)=> {
             if(response.data.showIn == "text"){
-                setShowInfo(true);
-                setEmail('');
-                setPass('');
-                setName('');
-                setTurma('');
                 if(response.data.level == 3){
                     setColorInfo('error');
                 }else if(response.data.level == 2){
                     setColorInfo('warm');
                 }else{
-                    setColorInfo('ok');
+                    navigation.navigate('Login');
                 }
+                setShowInfo(true);
+                setnewPass('');
+                setrenewpass('');
                 setInfoText(response.data.error);
             }else{
-                setshowBox(true);
-                setEmail('');
-                setPass('');
-                setName('');
-                setTurma('');
                 if(response.data.level == 3){
                     setcolorBox('error');
                 }else if(response.data.level == 2){
                     setcolorBox('warm');
                 }else{
-                    setcolorBox('ok');
+                    setshowContent(false);
+                    setbtnTxt('Continuar');
                 }
+                setshowBox(true);
+                setnewPass('');
+                setrenewpass('');
                 setboxText(response.data.error);
         }
         }).catch(function (error){
             if(error.response.data.showIn == "text"){
                 setShowInfo(true);
-                setEmail('');
-                setPass('');
-                setName('');
-                setTurma('');
-                this.nome.focus();
+                setnewPass('');
+                setrenewpass('');
+                this.newpass.focus();
                 if(error.response.data.level == 3){
                     setColorInfo('error');
                 }else if(error.response.data.level == 2){
@@ -77,11 +66,9 @@ export default function Register({ navigation }){
                 setInfoText(error.response.data.error);
             }else{
                 setshowBox(true);
-                setEmail('');
-                setPass('');
-                setName('');
-                setTurma('');
-                this.nome.focus();
+                setnewPass('');
+                setrenewpass('');
+                this.newpass.focus();
                 if(error.response.data.level == 3){
                     setcolorBox('error');
                 }else if(error.response.data.level == 2){
@@ -95,76 +82,59 @@ export default function Register({ navigation }){
     }
 
     function hideInfoDuringTyping(text, input){
-        if(input == "mail"){
-            setEmail(text);
-        }else if(input == "nome"){
-            setName(text);
-        }else if(input == "turma"){
-            setTurma(text);
+        if(input == "newpass"){
+            setnewPass(text);
         }else{
-            setPass(text);
+            setrenewpass(text);
         }
         setShowInfo(false);
         setshowBox(false);
     }
 
-    function startSession(){
-        navigation.navigate('Login');        
+    async function startSession(){
+        if(btnTxt == "Voltar"){
+            await AsyncStorage.removeItem("Authorization");
+        }
+        navigation.navigate('Login');
     }
 
     return (
         <KeyboardAvoidingView behavior="padding" style={styles.container}>
             <Text style={styles.logo}>Smart School</Text>
+            { showContent ? <Text style={styles.setsubtit}>Defina uma nova password para a sua conta!</Text> : null }
             <View style={styles.form}>
             { showBox ? colorBox == "warm" ? <View style={styles.boxWarm}><Text style={styles.boxWarmText}>{boxText}</Text></View> : colorBox == "error" ? <View style={styles.boxError}><Text style={styles.boxWarmText}>{boxText}</Text></View> : <View style={styles.boxOk}><Text style={styles.boxWarmText}>{boxText}</Text></View> : null }
-                <Text style={styles.label}>Nome:</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Introduza o seu nome"
-                    placeholderTexor="#999"
-                    keyboardType="default"
-                    autoCorrect={false}
-                    value={name}
-                    ref={(input) => this.nome = input}
-                    onChangeText={nome => hideInfoDuringTyping(nome, "nome")}
-                    onSubmitEditing={() => this.InEmail.focus()}
-                />
-                <Text style={styles.label}>E-MAIL:</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Introduza o seu e-mail"
-                    placeholderTextColor="#999"
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    value={email}
-                    ref={(input) => this.InEmail = input}
-                    onChangeText={mail => hideInfoDuringTyping(mail, "mail")}
-                    onSubmitEditing={() => this.passwords.focus()}
-                />
-                <Text style={styles.label}>PASSWORD:</Text>
+                { showContent ?
+                <View>
+                <Text style={styles.label}>INSIRA A NOVA PASSWORD:</Text>
                 <TextInput
                     style={styles.input}
                     textContentType="password"
-                    placeholder="Introduza a sua password"
+                    placeholder="Introduza a nova password"
                     secureTextEntry={true}
                     placeholderTextColor="#999"
-                    value={password}
-                    ref={(input) => this.passwords = input}
-                    onChangeText={pass => hideInfoDuringTyping(pass, "pass") }
+                    value={newPass}
+                    ref={(input) => this.newpass = input}
+                    onChangeText={pass => hideInfoDuringTyping(pass, "newpass") }
+                    onSubmitEditing={() => this.renewpass.focus()}
                 />
-                <Text style={styles.label}>Selecione a sua Turma</Text>
-                <Picker
-                style={styles.input}
-                selectedValue={turma}
-                onValueChange={(itemValue, itemIndex) => hideInfoDuringTyping(itemValue, "turma") } >
-                    { turmas.map(turma => (
-                        <Picker.Item key={turma} label={turma} value={turma} />
-                    ))}
-                </Picker>
+                <Text style={styles.label}>INSIRA A NOVA PASSWORD:</Text>
+                <TextInput
+                    style={styles.input}
+                    textContentType="password"
+                    placeholder="Introduza novamente a nova password"
+                    secureTextEntry={true}
+                    placeholderTextColor="#999"
+                    value={renewpass}
+                    ref={(input) => this.renewpass = input}
+                    onChangeText={pass => hideInfoDuringTyping(pass, "renewpass") }
+                    onSubmitEditing={handleRecover}
+                />
                 { showInfo ? <Text style={colorInfo == "warm" ? styles.infoWarm : colorInfo == "error" ? styles.infoError : styles.infoOk }>{infoText}</Text> : null }
-                <TouchableHighlight onPress={handleRegister} style={styles.buttonMain}><Text style={styles.buttonTextMain}>Criar a conta</Text></TouchableHighlight>
-                <TouchableHighlight onPress={startSession} style={styles.buttonSecundary}><Text style={styles.buttonTextSecundary}>Iniciar Sessão</Text></TouchableHighlight>
+                <TouchableHighlight onPress={handleRecover} style={styles.buttonMain}><Text style={styles.buttonTextMain}>Alterar a password</Text></TouchableHighlight>
+                </View>
+                : null }
+                <TouchableHighlight onPress={startSession} style={styles.buttonSecundary}><Text style={styles.buttonTextSecundary}>{btnTxt}</Text></TouchableHighlight>
             </View>
         </KeyboardAvoidingView>
     );
@@ -175,6 +145,9 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center'
+    },
+    setsubtit: {
+        marginTop: 10
     },
     form: {
         alignSelf: 'stretch',
