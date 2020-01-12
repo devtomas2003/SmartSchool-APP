@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Text, View, StyleSheet, KeyboardAvoidingView, StatusBar, TouchableHighlight } from 'react-native';
+import { Text, View, StyleSheet, KeyboardAvoidingView, StatusBar, TouchableOpacity } from 'react-native';
 import * as Permissions from 'expo-permissions';
 
 import { BarCodeScanner } from 'expo-barcode-scanner';
@@ -39,7 +39,7 @@ export default class qrcodeReader extends React.Component {
           <View style={styles.form}>
             <Text style={styles.txtTop}>Como bloqueou o accesso a camera não é possivel usar esta função!</Text>
             <Text style={styles.txtButtom}>Para permitir o acesso a camera, reabre a aplicação!</Text>
-            <TouchableHighlight onPress={this.back} style={styles.buttonMain}><Text style={styles.buttonTextMain}>Voltar</Text></TouchableHighlight>
+            <TouchableOpacity onPress={this.back} style={styles.buttonMain}><Text style={styles.buttonTextMain}>Voltar</Text></TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
       );

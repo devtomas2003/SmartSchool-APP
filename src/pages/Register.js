@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, KeyboardAvoidingView, StyleSheet, TextInput, TouchableHighlight, Text, Picker } from 'react-native';
+import { View, KeyboardAvoidingView, StyleSheet, TextInput, TouchableOpacity, Text, Picker, ScrollView  } from 'react-native';
 import api from '../services/api';
 export default function Register({ navigation }){
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPass] = useState('');
+    const [repassword, setrePass] = useState('');
     const [turmas, setTurmas] = useState([]);
     const [turma, setTurma] = useState('');
     const [infoText, setInfoText] = useState('');
@@ -24,74 +25,89 @@ export default function Register({ navigation }){
     }, []);
 
     async function handleRegister(){
-        await api.post('/newAccount', {
-            name,
-            mail: email,
-            password,
-            turma
-        }).then((response)=>{
-            if(response.data.showIn == "text"){
-                setShowInfo(true);
-                setEmail('');
-                setPass('');
-                setName('');
-                setTurma('');
-                if(response.data.level == 3){
-                    setColorInfo('error');
-                }else if(response.data.level == 2){
-                    setColorInfo('warm');
+        if(password != repassword){
+            setShowInfo(true);
+            setEmail('');
+            setPass('');
+            setName('');
+            setrePass('');
+            setTurma('');
+            setColorInfo('error');
+            setInfoText('As passwords não correspondem!');
+        }else{
+            await api.post('/newAccount', {
+                name,
+                mail: email,
+                password,
+                turma
+            }).then((response)=>{
+                if(response.data.showIn == "text"){
+                    setShowInfo(true);
+                    setEmail('');
+                    setPass('');
+                    setName('');
+                    setrePass('');
+                    setTurma('');
+                    if(response.data.level == 3){
+                        setColorInfo('error');
+                    }else if(response.data.level == 2){
+                        setColorInfo('warm');
+                    }else{
+                        setColorInfo('ok');
+                    }
+                    setInfoText(response.data.error);
                 }else{
-                    setColorInfo('ok');
-                }
-                setInfoText(response.data.error);
-            }else{
-                setshowBox(true);
-                setEmail('');
-                setPass('');
-                setName('');
-                setTurma('');
-                if(response.data.level == 3){
-                    setcolorBox('error');
-                }else if(response.data.level == 2){
-                    setcolorBox('warm');
+                    setshowBox(true);
+                    setEmail('');
+                    setPass('');
+                    setName('');
+                    setrePass('');
+                    setTurma('');
+                    if(response.data.level == 3){
+                        setcolorBox('error');
+                    }else if(response.data.level == 2){
+                        setcolorBox('warm');
+                    }else{
+                        setcolorBox('ok');
+                    }
+                    setboxText(response.data.error);
+            }
+            }).catch(function (error){
+                if(error.response.data.showIn == "text"){
+                    setShowInfo(true);
+                    setEmail('');
+                    setPass('');
+                    setName('');
+                    setrePass('');
+                    setTurma('');
+                    this.nome.focus();
+                    if(error.response.data.level == 3){
+                        setColorInfo('error');
+                    }else if(error.response.data.level == 2){
+                        setColorInfo('warm');
+                    }else{
+                        setColorInfo('ok');
+                    }
+                    setInfoText(error.response.data.error);
                 }else{
-                    setcolorBox('ok');
-                }
-                setboxText(response.data.error);
+                    setshowBox(true);
+                    setEmail('');
+                    setPass('');
+                    setrePass('');
+                    setName('');
+                    setTurma('');
+                    this.nome.focus();
+                    if(error.response.data.level == 3){
+                        setcolorBox('error');
+                    }else if(error.response.data.level == 2){
+                        setcolorBox('warm');
+                    }else{
+                        setcolorBox('ok');
+                    }
+                    setboxText(error.response.data.error);
+            }
+            });
         }
-        }).catch(function (error){
-            if(error.response.data.showIn == "text"){
-                setShowInfo(true);
-                setEmail('');
-                setPass('');
-                setName('');
-                setTurma('');
-                this.nome.focus();
-                if(error.response.data.level == 3){
-                    setColorInfo('error');
-                }else if(error.response.data.level == 2){
-                    setColorInfo('warm');
-                }else{
-                    setColorInfo('ok');
-                }
-                setInfoText(error.response.data.error);
-            }else{
-                setshowBox(true);
-                setEmail('');
-                setPass('');
-                setName('');
-                setTurma('');
-                this.nome.focus();
-                if(error.response.data.level == 3){
-                    setcolorBox('error');
-                }else if(error.response.data.level == 2){
-                    setcolorBox('warm');
-                }else{
-                    setcolorBox('ok');
-                }
-                setboxText(error.response.data.error);
-        }
-        });
     }
 
     function hideInfoDuringTyping(text, input){
@@ -101,8 +117,10 @@ export default function Register({ navigation }){
             setName(text);
         }else if(input == "turma"){
             setTurma(text);
-        }else{
+        }else if(input == "pass"){
             setPass(text);
+        }else{
+            setrePass(text);
         }
         setShowInfo(false);
         setshowBox(false);
@@ -113,6 +131,7 @@ export default function Register({ navigation }){
     }
 
     return (
+        <ScrollView>
         <KeyboardAvoidingView behavior="padding" style={styles.container}>
             <Text style={styles.logo}>Smart School</Text>
             <View style={styles.form}>
@@ -152,6 +171,18 @@ export default function Register({ navigation }){
                     value={password}
                     ref={(input) => this.passwords = input}
                     onChangeText={pass => hideInfoDuringTyping(pass, "pass") }
+                    onSubmitEditing={() => this.repasswords.focus()}
+                />
+                <Text style={styles.label}>Repita a PASSWORD:</Text>
+                <TextInput
+                    style={styles.input}
+                    textContentType="password"
+                    placeholder="Introduza a sua password novamente"
+                    secureTextEntry={true}
+                    placeholderTextColor="#999"
+                    value={repassword}
+                    ref={(input) => this.repasswords = input}
+                    onChangeText={repass => hideInfoDuringTyping(repass, "repass") }
                 />
                 <Text style={styles.label}>Selecione a sua Turma</Text>
                 <Picker
@@ -163,10 +194,11 @@ export default function Register({ navigation }){
                     ))}
                 </Picker>
                 { showInfo ? <Text style={colorInfo == "warm" ? styles.infoWarm : colorInfo == "error" ? styles.infoError : styles.infoOk }>{infoText}</Text> : null }
-                <TouchableHighlight onPress={handleRegister} style={styles.buttonMain}><Text style={styles.buttonTextMain}>Criar a conta</Text></TouchableHighlight>
-                <TouchableHighlight onPress={startSession} style={styles.buttonSecundary}><Text style={styles.buttonTextSecundary}>Iniciar Sessão</Text></TouchableHighlight>
+                <TouchableOpacity onPress={handleRegister} style={styles.buttonMain}><Text style={styles.buttonTextMain}>Criar a conta</Text></TouchableOpacity>
+                <TouchableOpacity onPress={startSession} style={styles.buttonSecundary}><Text style={styles.buttonTextSecundary}>Iniciar Sessão</Text></TouchableOpacity>
             </View>
         </KeyboardAvoidingView>
+        </ScrollView>
     );
 }
 
@@ -205,6 +237,7 @@ const styles = StyleSheet.create({
     },
     buttonSecundary: {
         height: 42,
+        marginBottom: 10,
         borderWidth: 1,
         borderColor: '#f05a5b',
         backgroundColor: '#FFF',

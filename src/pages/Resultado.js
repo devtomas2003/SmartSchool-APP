@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-import { Text, SafeAreaView, StyleSheet, AsyncStorage } from 'react-native';
+import { Text, SafeAreaView, StyleSheet, AsyncStorage, View, TouchableOpacity } from 'react-native';
 export default function Resultado({ navigation }){
     const [disciplina, setDisciplina] = useState('');
     const [prof, setProf] = useState('');
@@ -46,14 +46,14 @@ export default function Resultado({ navigation }){
     { showBox ? colorBox == "warm" ? <View style={styles.boxWarm}><Text style={styles.boxWarmText}>{boxText}</Text></View> : colorBox == "error" ? <View style={styles.boxError}><Text style={styles.boxWarmText}>{boxText}</Text></View> : <View style={styles.boxOk}><Text style={styles.boxWarmText}>{boxText}</Text></View> : null }
         { cnt ?
         <View>
-        <Text>Disciplina: {disciplina}</Text>
-        <Text>Professor: {prof}</Text>
-        <Text>Sala: {sala}</Text>
-        <Text>Turma: {turma}</Text>
+        <Text style={styles.txtInfo}>Disciplina: {disciplina}</Text>
+        <Text style={styles.txtInfo}>Professor: {prof}</Text>
+        <Text style={styles.txtInfo}>Sala: {sala}</Text>
+        <Text style={styles.txtInfoEnd}>Turma: {turma}</Text>
         </View>
         : null }
-        <TouchableHighlight onPress={readanother} style={styles.buttonMain}><Text style={styles.buttonTextMain}>Ler Outro QrCode</Text></TouchableHighlight>
-        <TouchableHighlight onPress={back} style={styles.buttonSecundary}><Text style={styles.buttonTextSecundary}>Voltar para o Menu</Text></TouchableHighlight>
+        <TouchableOpacity onPress={readanother} style={styles.buttonMain}><Text style={styles.buttonTextMain}>Ler Outro QrCode</Text></TouchableOpacity>
+        <TouchableOpacity onPress={back} style={styles.buttonSecundary}><Text style={styles.buttonTextSecundary}>Voltar para o Menu</Text></TouchableOpacity>
     </View>
     </SafeAreaView>
     );
@@ -64,6 +64,13 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center'
+    },
+    txtInfo: {
+        textAlign: 'center'
+    },
+    txtInfoEnd:{
+        textAlign: 'center',
+        marginBottom: 10
     },
     form: {
         alignSelf: 'stretch',

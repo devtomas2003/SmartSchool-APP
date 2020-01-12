@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, KeyboardAvoidingView, StyleSheet, TextInput, TouchableHighlight, Text, AsyncStorage } from 'react-native';
+import { View, KeyboardAvoidingView, StyleSheet, TextInput, TouchableOpacity, Text, AsyncStorage } from 'react-native';
 import api from '../services/api';
 export default function Recuperation({ navigation }){
     const [newPass, setnewPass] = useState('');
@@ -118,7 +118,7 @@ export default function Recuperation({ navigation }){
                     onChangeText={pass => hideInfoDuringTyping(pass, "newpass") }
                     onSubmitEditing={() => this.renewpass.focus()}
                 />
-                <Text style={styles.label}>INSIRA A NOVA PASSWORD:</Text>
+                <Text style={styles.label}>INSIRA A NOVA PASSWORD NOVAMENTE:</Text>
                 <TextInput
                     style={styles.input}
                     textContentType="password"
@@ -131,10 +131,10 @@ export default function Recuperation({ navigation }){
                     onSubmitEditing={handleRecover}
                 />
                 { showInfo ? <Text style={colorInfo == "warm" ? styles.infoWarm : colorInfo == "error" ? styles.infoError : styles.infoOk }>{infoText}</Text> : null }
-                <TouchableHighlight onPress={handleRecover} style={styles.buttonMain}><Text style={styles.buttonTextMain}>Alterar a password</Text></TouchableHighlight>
+                <TouchableOpacity onPress={handleRecover} style={styles.buttonMain}><Text style={styles.buttonTextMain}>Alterar a password</Text></TouchableOpacity>
                 </View>
                 : null }
-                <TouchableHighlight onPress={startSession} style={styles.buttonSecundary}><Text style={styles.buttonTextSecundary}>{btnTxt}</Text></TouchableHighlight>
+                <TouchableOpacity onPress={startSession} style={styles.buttonSecundary}><Text style={styles.buttonTextSecundary}>{btnTxt}</Text></TouchableOpacity>
             </View>
         </KeyboardAvoidingView>
     );

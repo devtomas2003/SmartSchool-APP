@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, AsyncStorage, KeyboardAvoidingView, StyleSheet, TextInput, TouchableHighlight, Text } from 'react-native';
+import { View, AsyncStorage, KeyboardAvoidingView, StyleSheet, TextInput, TouchableOpacity, Text } from 'react-native';
 import NetInfo from "@react-native-community/netinfo";
 import api from '../services/api';
 export default function Login({ navigation }){
@@ -70,10 +70,10 @@ export default function Login({ navigation }){
                         }
                         setboxText(error.response.data.error);
                 }
-                devNotifications();
                 });
             }
         }
+        devNotifications();
         async function devNotifications() {
                 await api.post('/devNotification', null).then((response)=>{
                     if(response.data.status == "needShow"){
@@ -180,9 +180,9 @@ export default function Login({ navigation }){
                     onSubmitEditing={handleLogin}
                 />
                 { showInfo ? <Text style={colorInfo ? styles.infoWarm : styles.infoError}>{infoText}</Text> : null }
-                <TouchableHighlight onPress={handleLogin} style={styles.buttonMain}><Text style={styles.buttonTextMain}>Iniciar Sessão</Text></TouchableHighlight>
-                <TouchableHighlight onPress={makeAccount} style={styles.buttonSecundary}><Text style={styles.buttonTextSecundary}>Criar uma conta!</Text></TouchableHighlight>
-                <TouchableHighlight onPress={recoverPass} style={styles.buttonSecundary}><Text style={styles.buttonTextSecundary}>Esqueci a minha password!</Text></TouchableHighlight>
+                <TouchableOpacity onPress={handleLogin} style={styles.buttonMain}><Text style={styles.buttonTextMain}>Iniciar Sessão</Text></TouchableOpacity>
+                <TouchableOpacity onPress={makeAccount} style={styles.buttonSecundary}><Text style={styles.buttonTextSecundary}>Criar uma conta!</Text></TouchableOpacity>
+                <TouchableOpacity onPress={recoverPass} style={styles.buttonSecundary}><Text style={styles.buttonTextSecundary}>Esqueci a minha password!</Text></TouchableOpacity>
             </View>
         </KeyboardAvoidingView>
     );

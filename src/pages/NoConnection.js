@@ -1,5 +1,5 @@
 import React from 'react';
-import { SafeAreaView, StyleSheet, Image, Text, View, TouchableHighlight } from 'react-native';
+import { SafeAreaView, StyleSheet, Image, Text, View, TouchableOpacity } from 'react-native';
 import NetInfo from "@react-native-community/netinfo";
 import nonet from '../assets/nonet.png';
 export default function NoConnection({ navigation }){
@@ -18,7 +18,7 @@ export default function NoConnection({ navigation }){
         <View style={styles.nonetview}>
             <Text style={styles.label}>Pelos vistos, não estás ligado a internet!</Text>
             <Text style={styles.label}>Para usares a app Smart School, liga-te a internet!</Text>
-            <TouchableHighlight style={styles.button} onPress={reConnect}><Text style={styles.buttonText}>Tentar Novamente</Text></TouchableHighlight>
+            <TouchableOpacity style={styles.button} onPress={reConnect}><Text style={styles.buttonText}>Tentar Novamente</Text></TouchableOpacity>
         </View>
     </SafeAreaView>
     );

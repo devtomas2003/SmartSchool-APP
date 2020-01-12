@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { SafeAreaView, StyleSheet, Image, Text, View, TouchableHighlight } from 'react-native';
+import { SafeAreaView, StyleSheet, Image, Text, View, TouchableOpacity, Linking } from 'react-native';
 import update from '../assets/updated.png';
 export default function Update({ navigation }){
 
@@ -19,6 +19,10 @@ export default function Update({ navigation }){
         navigation.navigate('Login', { userState: 'decideToContinue' });
     }
 
+    function startupdate() {
+        Linking.openURL('https://tondela.cf/upschool.php');
+    }
+
     return(
     <SafeAreaView style={styles.container}>
         <Image source={update} style={styles.errorImage}  />
@@ -26,8 +30,8 @@ export default function Update({ navigation }){
             <Text style={styles.label}>Temos novas funcionalidades para você!</Text>
             { forceDownload ? <Text style={styles.label}>Para continuares a usar a app, atualiza para a versão mais recente da APP SmartSchool!</Text> : <Text style={styles.label}>Atualiza para a versão mais recente da APP SmartSchool!</Text> }
             { forceDownload ? null : <Text style={styles.label}>Em breve esta versão deixara de funcionar!</Text> }
-            <TouchableHighlight style={styles.button}><Text style={styles.buttonText}>Atualizar ({newVersion})</Text></TouchableHighlight>
-            { forceDownload ? null : <TouchableHighlight onPress={continues} style={styles.button}><Text style={styles.buttonText}>Continuar a usar a APP</Text></TouchableHighlight> }
+            <TouchableOpacity onPress={startupdate} style={styles.button}><Text style={styles.buttonText}>Atualizar ({newVersion})</Text></TouchableOpacity>
+            { forceDownload ? null : <TouchableOpacity onPress={continues} style={styles.button}><Text style={styles.buttonText}>Continuar a usar a APP</Text></TouchableOpacity> }
             
         </View>
     </SafeAreaView>

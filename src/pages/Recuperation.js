@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, KeyboardAvoidingView, StyleSheet, TextInput, TouchableHighlight, Text, Picker } from 'react-native';
+import { View, KeyboardAvoidingView, StyleSheet, TextInput, TouchableOpacity, Text } from 'react-native';
 import api from '../services/api';
 export default function Recuperation({ navigation }){
     const [email, setEmail] = useState('');
@@ -97,8 +97,8 @@ export default function Recuperation({ navigation }){
                     onSubmitEditing={handleRecover}
                 />
                 { showInfo ? <Text style={colorInfo == "warm" ? styles.infoWarm : colorInfo == "error" ? styles.infoError : styles.infoOk }>{infoText}</Text> : null }
-                <TouchableHighlight onPress={handleRecover} style={styles.buttonMain}><Text style={styles.buttonTextMain}>Recuperar Password</Text></TouchableHighlight>
-                <TouchableHighlight onPress={startSession} style={styles.buttonSecundary}><Text style={styles.buttonTextSecundary}>Lembrei-me!</Text></TouchableHighlight>
+                <TouchableOpacity onPress={handleRecover} style={styles.buttonMain}><Text style={styles.buttonTextMain}>Recuperar Password</Text></TouchableOpacity>
+                <TouchableOpacity onPress={startSession} style={styles.buttonSecundary}><Text style={styles.buttonTextSecundary}>Lembrei-me!</Text></TouchableOpacity>
             </View>
         </KeyboardAvoidingView>
     );
