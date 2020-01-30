@@ -47,7 +47,7 @@ export default function Resultado({ navigation }){
         { cnt ?
         <View>
         <Text style={styles.txtInfo}>Disciplina: {disciplina}</Text>
-        <Text style={styles.txtInfo}>Professor: {prof}</Text>
+        <Text style={styles.txtInfo}>Professor(a): {prof}</Text>
         <Text style={styles.txtInfo}>Sala: {sala}</Text>
         <Text style={styles.txtInfoEnd}>Turma: {turma}</Text>
         </View>

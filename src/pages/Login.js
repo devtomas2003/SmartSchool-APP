@@ -14,12 +14,11 @@ export default function Login({ navigation }){
     const [showDev, setshowDev] = useState(false);
     const [colorDev, setcolorDev] = useState('');
     const [devText, setdevText] = useState('');
-
-
+    
     useEffect(() => {
         NetInfo.fetch().then(state => {
             if(state.isConnected == false){
-                navigation.navigate('NoConnection');
+                navigation.navigate('Menu');
             }else{
                 verifyVersion();
             }
@@ -48,7 +47,21 @@ export default function Login({ navigation }){
                     headers: { 'Authorization': 'EST ' + await AsyncStorage.getItem("Authorization") }
                 }).then((res)=>{
                     if(res.data.recuperated == 0){
-                        navigation.navigate('Menu', { name: res.data.name });
+                        await api.post('/checkSum', null, {
+                            headers: { 'Authorization': 'EST ' + await AsyncStorage.getItem("Authorization") }
+                        }).then((res)=>{
+                            const lastUpdate = await AsyncStorage.getItem('checksum');
+                            if(!lastUpdate){
+                                navigation.navigate('Sync');
+                            }else{
+                                if(lastUpdate == res.validationHash){
+                                    navigation.navigate('Menu');
+                                }else{
+                                    navigation.navigate('Sync');
+                                }
+                            }
+                        });
+                        //navigation.navigate('Menu', { name: res.data.name });
                     }else{
                         navigation.navigate('ResetPassword');
                     }
@@ -75,13 +88,13 @@ export default function Login({ navigation }){
         }
         devNotifications();
         async function devNotifications() {
-                await api.post('/devNotification', null).then((response)=>{
-                    if(response.data.status == "needShow"){
-                        setshowDev(true);
-                        setcolorDev(response.data.colorDev);
-                        setdevText(response.data.txtDev);
-                    }
-                });
+            await api.post('/devNotification', null).then((response)=>{
+                if(response.data.status == "needShow"){
+                    setshowDev(true);
+                    setcolorDev(response.data.colorDev);
+                    setdevText(response.data.txtDev);
+                }
+            });
         }
     }, []);
 
